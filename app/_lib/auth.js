@@ -27,7 +27,7 @@ export const {
     },
     async session({ session, user }) {
       const guest = await getGuest(session.user.email);
-      session.user.geustId = getGuest.id;
+      session.user.guestId = guest.id;
       return session;
     },
   },
