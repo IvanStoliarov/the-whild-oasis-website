@@ -3,8 +3,9 @@
 import { revalidatePath } from 'next/cache';
 import { auth, signIn, signOut } from './auth';
 import { supabase } from './supabase';
-import { getBookings } from './data-service';
+import { getBookings, getCabinPrice, getSettings } from './data-service';
 import { redirect, RedirectType } from 'next/navigation';
+import { differenceInDays } from 'date-fns';
 
 export async function signInAction() {
   await signIn('google', { redirectTo: '/account' });
@@ -92,15 +93,34 @@ export default async function updateReservation(formData) {
 export async function createBooking(bookingData, formData) {
   const session = await auth();
   if (!session) throw new Error('You must be logged in');
+
+  const [{ regularPrice, discount }, { breakfastPrice }] = await Promise.all([
+    getCabinPrice(bookingData.cabinId),
+    getSettings(),
+  ]);
+
+  const numGuests = Number(formData.get('numGuests'));
+  const numNights = differenceInDays(
+    new Date(bookingData.endDate),
+    new Date(bookingData.startDate),
+  );
+  const hasBreakfast = !!formData.get('breakfast');
+  const cabinPrice = numNights * (regularPrice - discount);
+  const extrasPrice = hasBreakfast
+    ? numNights * numGuests * breakfastPrice
+    : 0;
+
   const newBooking = {
     ...bookingData,
+    numNights,
+    cabinPrice,
     guestId: session.user.guestId,
-    numGuests: Number(formData.get('numGuests')),
+    numGuests,
     observations: formData.get('observations').slice(1, 1000),
-    extrasPrice: 0,
-    totalPrice: bookingData.cabinPrice,
+    extrasPrice,
+    totalPrice: cabinPrice + extrasPrice,
     isPaid: false,
-    hasBreakfast: false,
+    hasBreakfast,
     status: 'unconfirmed',
   };
 

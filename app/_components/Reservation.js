@@ -1,4 +1,3 @@
-import React from 'react';
 import DateSelector from '@/app/_components/DateSelector';
 import ReservationForm from '@/app/_components/ReservationForm';
 import { getBookedDatesByCabinId, getSettings } from '@/app/_lib/data-service';
@@ -19,7 +18,11 @@ export default async function Reservation({ cabin }) {
         cabin={cabin}
       />
       {session?.user ? (
-        <ReservationForm cabin={cabin} user={session.user} />
+        <ReservationForm
+          cabin={cabin}
+          user={session.user}
+          settings={settings}
+        />
       ) : (
         <LoginMessage />
       )}

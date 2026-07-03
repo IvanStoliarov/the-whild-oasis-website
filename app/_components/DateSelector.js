@@ -7,7 +7,6 @@ import {
 } from 'date-fns';
 import { DayPicker } from '@daypicker/react';
 import '@daypicker/react/style.css';
-import { useState } from 'react';
 import { useReservation } from './ReservationContext';
 
 function isAlreadyBooked(range, datesArr) {
@@ -21,14 +20,19 @@ function isAlreadyBooked(range, datesArr) {
 }
 
 function DateSelector({ settings, bookedDates, cabin }) {
-  const { range, setRange, resetRange } = useReservation();
+  const { range, setRange, resetRange, numGuests, hasBreakfast } =
+    useReservation();
 
   const { regularPrice, discount } = cabin;
   const displayRange = isAlreadyBooked(range, bookedDates) ? {} : range;
   const numNights = differenceInDays(displayRange.to, displayRange.from);
   const cabinPrice = numNights * (regularPrice - discount);
 
-  const { minBookingLength, maxBookingLength } = settings;
+  const { minBookingLength, maxBookingLength, breakfastPrice } = settings;
+  const extrasPrice = hasBreakfast
+    ? numNights * Number(numGuests) * breakfastPrice
+    : 0;
+  const totalPrice = cabinPrice + extrasPrice;
 
   return (
     <div className='flex flex-col justify-between'>
@@ -68,7 +72,12 @@ function DateSelector({ settings, bookedDates, cabin }) {
               </p>
               <p>
                 <span className='text-lg font-bold uppercase'>Total</span>{' '}
-                <span className='text-2xl font-semibold'>${cabinPrice}</span>
+                <span className='text-2xl font-semibold'>${totalPrice}</span>
+                {extrasPrice > 0 ? (
+                  <span className='block text-xs font-medium'>
+                    Includes ${extrasPrice} breakfast
+                  </span>
+                ) : null}
               </p>
             </>
           ) : null}

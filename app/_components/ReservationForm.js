@@ -1,24 +1,25 @@
 'use client';
 import Image from 'next/image';
 import { useReservation } from './ReservationContext';
-import { differenceInDays } from 'date-fns';
 import { createBooking } from '../_lib/actions';
 import SubmitButton from './SubmitButton';
 
-function ReservationForm({ cabin, user }) {
-  // CHANGE
-  const { range, resetRange } = useReservation();
-  const { maxCapacity, regularPrice, discount, id } = cabin;
+function ReservationForm({ cabin, user, settings }) {
+  const {
+    range,
+    numGuests,
+    setNumGuests,
+    hasBreakfast,
+    setHasBreakfast,
+    resetReservation,
+  } = useReservation();
+  const { maxCapacity, id } = cabin;
   const startDate = range.from;
   const endDate = range.to;
-  const numNights = differenceInDays(endDate, startDate);
-  const cabinPrice = numNights * (regularPrice - discount);
 
   const bookingData = {
     startDate,
     endDate,
-    numNights,
-    cabinPrice,
     cabinId: id,
   };
 
@@ -44,9 +45,8 @@ function ReservationForm({ cabin, user }) {
       </div>
 
       <form
-        // action={createBookingWithData}
         action={async formData => {
-          resetRange();
+          resetReservation();
           await createBookingWithData(formData);
         }}
         className='bg-primary-900 py-10 px-16 text-lg flex gap-5 flex-col'
@@ -56,6 +56,8 @@ function ReservationForm({ cabin, user }) {
           <select
             name='numGuests'
             id='numGuests'
+            value={numGuests}
+            onChange={event => setNumGuests(event.target.value)}
             className='px-5 py-3 bg-primary-200 text-primary-800 w-full shadow-sm rounded-sm'
             required
           >
@@ -68,6 +70,19 @@ function ReservationForm({ cabin, user }) {
               </option>
             ))}
           </select>
+        </div>
+
+        <div className='flex items-center space-x-2'>
+          <input
+            type='checkbox'
+            name='breakfast'
+            id='breakfast'
+            checked={hasBreakfast}
+            onChange={event => setHasBreakfast(event.target.checked)}
+          />
+          <label htmlFor='breakfast'>
+            Add breakfast (${settings.breakfastPrice} per guest/night)
+          </label>
         </div>
 
         <div className='space-y-2'>
