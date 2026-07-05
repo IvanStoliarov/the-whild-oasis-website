@@ -1,4 +1,4 @@
-import { eachDayOfInterval } from 'date-fns';
+import { eachDayOfInterval, format, parseISO } from 'date-fns';
 import { notFound } from 'next/navigation';
 import { supabase } from './supabase';
 import type {
@@ -151,14 +151,13 @@ export async function getBookings(
 export async function getBookedDatesByCabinId(
   cabinId: number | string,
 ): Promise<Date[]> {
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
+  const today = format(new Date(), 'yyyy-MM-dd');
 
   const { data, error } = await supabase
     .from('bookings')
     .select('startDate, endDate')
     .eq('cabinId', Number(cabinId))
-    .or(`startDate.gte.${today.toISOString()},status.eq.checked-in`);
+    .gte('endDate', today);
 
   if (error) {
     console.error(error);
@@ -168,8 +167,8 @@ export async function getBookedDatesByCabinId(
   return data.flatMap(booking => {
     if (!booking.startDate || !booking.endDate) return [];
     return eachDayOfInterval({
-      start: new Date(booking.startDate),
-      end: new Date(booking.endDate),
+      start: parseISO(booking.startDate),
+      end: parseISO(booking.endDate),
     });
   });
 }

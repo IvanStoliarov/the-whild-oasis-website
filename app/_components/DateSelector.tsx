@@ -42,14 +42,13 @@ const ReservationDayPicker = memo(function ReservationDayPicker({
     <DayPicker
       className='pt-5 place-self-center'
       mode='range'
-      min={minBookingLength + 1}
+      min={minBookingLength}
       max={maxBookingLength}
       startMonth={new Date()}
       selected={selected}
       onSelect={onSelect}
       disabled={curDate =>
-        isPast(curDate) ||
-        bookedDates.some(date => isSameDay(date, curDate))
+        isPast(curDate) || bookedDates.some(date => isSameDay(date, curDate))
       }
     />
   );
