@@ -13,11 +13,16 @@ type ReservationContextValue = {
   range: DateRange;
   setRange: Dispatch<SetStateAction<DateRange>>;
   resetRange: () => void;
-  numGuests: string;
-  setNumGuests: Dispatch<SetStateAction<string>>;
+  numGuests: string | number;
+  setNumGuests: Dispatch<SetStateAction<string | number>>;
   hasBreakfast: boolean;
   setHasBreakfast: Dispatch<SetStateAction<boolean>>;
+  clearReservation: () => void;
   resetReservation: () => void;
+  setBreakfastPrice: Dispatch<SetStateAction<number>>;
+  breakfastPrice: number;
+  currentBookingRange: null | DateRange;
+  setCurrentBookingRange: Dispatch<SetStateAction<DateRange | null>>;
 };
 
 const ReservationContext = createContext<ReservationContextValue | undefined>(
@@ -28,14 +33,21 @@ const initialState: DateRange = { from: undefined, to: undefined };
 
 function ReservationProvider({ children }: { children: ReactNode }) {
   const [range, setRange] = useState(initialState);
-  const [numGuests, setNumGuests] = useState('');
+  const [numGuests, setNumGuests] = useState<string | number>('');
   const [hasBreakfast, setHasBreakfast] = useState(false);
+  const [breakfastPrice, setBreakfastPrice] = useState(0);
+  const [currentBookingRange, setCurrentBookingRange] =
+    useState<null | DateRange>(null);
 
   const resetRange = () => setRange(initialState);
-  const resetReservation = () => {
+  const clearReservation = () => {
     setRange(initialState);
     setNumGuests('');
     setHasBreakfast(false);
+  };
+  const resetReservation = () => {
+    clearReservation();
+    setCurrentBookingRange(null);
   };
 
   return (
@@ -48,7 +60,12 @@ function ReservationProvider({ children }: { children: ReactNode }) {
         setNumGuests,
         hasBreakfast,
         setHasBreakfast,
+        clearReservation,
         resetReservation,
+        breakfastPrice,
+        setBreakfastPrice,
+        currentBookingRange,
+        setCurrentBookingRange,
       }}
     >
       {children}
