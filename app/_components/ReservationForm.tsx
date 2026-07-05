@@ -1,18 +1,16 @@
 'use client';
-import Image from 'next/image';
 import { useReservation } from './ReservationContext';
 import { createBooking } from '../_lib/actions';
 import SubmitButton from './SubmitButton';
-import type { User } from 'next-auth';
 import type { Cabin, Settings } from '../_lib/types';
 
 type ReservationFormProps = {
   cabin: Cabin;
-  user: User;
   settings: Settings;
+  children: React.ReactNode;
 };
 
-function ReservationForm({ cabin, user, settings }: ReservationFormProps) {
+function ReservationForm({ cabin, settings, children }: ReservationFormProps) {
   const {
     range,
     numGuests,
@@ -27,26 +25,12 @@ function ReservationForm({ cabin, user, settings }: ReservationFormProps) {
 
   return (
     <div className='scale-[1.01]'>
-      <div className='bg-primary-800 text-primary-300 px-16 py-2 flex justify-between items-center'>
-        <p>Logged in as </p>
-
-        <div className='flex gap-4 items-center'>
-          <div className='h-8 aspect-square relative'>
-            <Image
-              fill
-              referrerPolicy='no-referrer'
-              className='rounded-full object-cover'
-              src={user.image ?? ''}
-              alt={user.name ?? 'Guest'}
-            />
-          </div>
-          <p>{user.name}</p>
-        </div>
-      </div>
+      {children}
 
       <form
         action={async formData => {
-          if (!startDate || !endDate) throw new Error('Select reservation dates');
+          if (!startDate || !endDate)
+            throw new Error('Select reservation dates');
           resetReservation();
           await createBooking({ startDate, endDate, cabinId: id }, formData);
         }}
