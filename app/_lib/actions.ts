@@ -10,14 +10,45 @@ import {
   getSettings,
 } from './data-service';
 import { redirect, RedirectType } from 'next/navigation';
-import { differenceInDays, format } from 'date-fns';
-import type { BookingData, BookingInsert } from './types';
-import { DateRange } from '@daypicker/react';
+import { format } from 'date-fns';
+import type { BookingData, BookingInsert, BookingWithCabin } from './types';
+import type { DateRange } from '@daypicker/react';
+import { calculateBookingPrice } from './booking-utils';
 
 function getFormString(formData: FormData, key: string): string {
   const value = formData.get(key);
   if (typeof value !== 'string') throw new Error(`${key} is required`);
   return value;
+}
+
+async function requireSession() {
+  const session = await auth();
+  if (!session) throw new Error('You must be logged in');
+  return session;
+}
+
+async function getGuestReservation(
+  guestId: number,
+  reservationId: number,
+  unauthorizedMessage: string,
+): Promise<BookingWithCabin> {
+  const reservations = await getBookings(guestId);
+  const reservation = reservations.find(booking => booking.id === reservationId);
+
+  if (!reservation) throw new Error(unauthorizedMessage);
+  return reservation;
+}
+
+function getBookingFormFields(formData: FormData) {
+  return {
+    numGuests: Number(getFormString(formData, 'numGuests')),
+    observations: getFormString(formData, 'observations').slice(0, 1000),
+    hasBreakfast: !!formData.get('breakfast'),
+  };
+}
+
+function formatBookingDate(date: Date) {
+  return format(date, 'yyyy-MM-dd');
 }
 
 export async function signInAction() {
@@ -29,8 +60,7 @@ export async function signOutAction() {
 }
 
 export async function updateGuest(formData: FormData) {
-  const session = await auth();
-  if (!session) throw new Error('You must be logged in');
+  const session = await requireSession();
   const nationalID = getFormString(formData, 'nationalID');
   const [nationality, countryFlag] = getFormString(
     formData,
@@ -53,14 +83,12 @@ export async function updateGuest(formData: FormData) {
 }
 
 export async function deleteReservation(bookingId: number) {
-  const session = await auth();
-  if (!session) throw new Error('You must be logged in');
-
-  const guestBookings = await getBookings(session.user.guestId);
-  const guestBookingsIds = guestBookings.map(booking => booking.id);
-
-  if (!guestBookingsIds.includes(bookingId))
-    throw new Error('You are not allowed to delete this booking');
+  const session = await requireSession();
+  await getGuestReservation(
+    session.user.guestId,
+    bookingId,
+    'You are not allowed to delete this booking',
+  );
 
   const { error } = await supabase
     .from('bookings')
@@ -78,20 +106,14 @@ export default async function updateReservation(
   formData: FormData,
   range: DateRange,
 ) {
-  const session = await auth();
-  if (!session) throw new Error('You must be logged in');
-  const guestBookings = await getBookings(session.user.guestId);
-  const guestBookingsIds = guestBookings.map(booking => booking.id);
+  const session = await requireSession();
   const reservationId = Number(getFormString(formData, 'reservationId'));
-
-  if (!guestBookingsIds.includes(reservationId)) {
-    throw new Error("Can't change this booking");
-  }
-
-  const currentReservation = guestBookings.find(
-    booking => booking.id === reservationId,
+  const currentReservation = await getGuestReservation(
+    session.user.guestId,
+    reservationId,
+    "Can't change this booking",
   );
-  const cabinId = currentReservation?.cabinId;
+  const cabinId = currentReservation.cabinId;
   if (!cabinId) {
     throw new Error('No cabin found for booking');
   }
@@ -105,8 +127,8 @@ export default async function updateReservation(
     throw new Error("Range hasn't been selected");
   }
 
-  const startDate = format(range.from, 'yyyy-MM-dd');
-  const endDate = format(range.to, 'yyyy-MM-dd');
+  const startDate = formatBookingDate(range.from);
+  const endDate = formatBookingDate(range.to);
   const { data: conflictingBookings, error: availabilityError } = await supabase
     .from('bookings')
     .select('id')
@@ -123,26 +145,25 @@ export default async function updateReservation(
     throw new Error('The selected dates are no longer available');
   }
 
-  const hasBreakfast = !!formData.get('breakfast');
-
-  const numNights = differenceInDays(new Date(range.to), new Date(range.from));
-  const cabinPrice = (regularPrice - discount) * numNights;
-  const numGuests = Number(getFormString(formData, 'numGuests'));
-  const extrasPrice = hasBreakfast
-    ? settings.breakfastPrice * numNights * numGuests
-    : 0;
-  const totalPrice = cabinPrice + extrasPrice;
+  const { numGuests, observations, hasBreakfast } =
+    getBookingFormFields(formData);
+  const priceDetails = calculateBookingPrice({
+    startDate: range.from,
+    endDate: range.to,
+    regularPrice,
+    discount,
+    breakfastPrice: settings.breakfastPrice,
+    numGuests,
+    hasBreakfast,
+  });
 
   const updatedFields = {
     numGuests,
-    observations: getFormString(formData, 'observations').slice(0, 1000),
+    observations,
     startDate,
     endDate,
     hasBreakfast,
-    numNights,
-    cabinPrice,
-    extrasPrice,
-    totalPrice,
+    ...priceDetails,
   };
 
   const { error } = await supabase
@@ -166,34 +187,33 @@ export async function createBooking(
   bookingData: BookingData,
   formData: FormData,
 ) {
-  const session = await auth();
-  if (!session) throw new Error('You must be logged in');
+  const session = await requireSession();
 
   const [{ regularPrice, discount }, { breakfastPrice }] = await Promise.all([
     getCabinPrice(bookingData.cabinId),
     getSettings(),
   ]);
 
-  const numGuests = Number(getFormString(formData, 'numGuests'));
-  const numNights = differenceInDays(
-    new Date(bookingData.endDate),
-    new Date(bookingData.startDate),
-  );
-  const hasBreakfast = !!formData.get('breakfast');
-  const cabinPrice = numNights * (regularPrice - discount);
-  const extrasPrice = hasBreakfast ? numNights * numGuests * breakfastPrice : 0;
+  const { numGuests, observations, hasBreakfast } =
+    getBookingFormFields(formData);
+  const priceDetails = calculateBookingPrice({
+    startDate: bookingData.startDate,
+    endDate: bookingData.endDate,
+    regularPrice,
+    discount,
+    breakfastPrice,
+    numGuests,
+    hasBreakfast,
+  });
 
   const newBooking: BookingInsert = {
     ...bookingData,
-    startDate: format(bookingData.startDate, 'yyyy-MM-dd'),
-    endDate: format(bookingData.endDate, 'yyyy-MM-dd'),
-    numNights,
-    cabinPrice,
+    startDate: formatBookingDate(bookingData.startDate),
+    endDate: formatBookingDate(bookingData.endDate),
     guestId: session.user.guestId,
     numGuests,
-    observations: getFormString(formData, 'observations').slice(0, 1000),
-    extrasPrice,
-    totalPrice: cabinPrice + extrasPrice,
+    observations,
+    ...priceDetails,
     isPaid: false,
     hasBreakfast,
     status: 'unconfirmed',

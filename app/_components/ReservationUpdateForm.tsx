@@ -25,7 +25,6 @@ export default function ReservationUpdateForm({
 }: Props) {
   const { id: reservationId, observations } = reservation;
   const {
-    setBreakfastPrice,
     setRange,
     setCurrentBookingRange,
     setNumGuests,
@@ -35,7 +34,6 @@ export default function ReservationUpdateForm({
   } = useReservation();
 
   useEffect(() => {
-    setBreakfastPrice(settings.breakfastPrice);
     if (reservation.startDate && reservation.endDate) {
       setCurrentBookingRange({
         from: new Date(reservation.startDate),

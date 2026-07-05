@@ -1,6 +1,5 @@
 'use client';
 import {
-  differenceInDays,
   endOfDay,
   isPast,
   isSameDay,
@@ -9,7 +8,7 @@ import {
 } from 'date-fns';
 import { DayPicker } from '@daypicker/react';
 import '@daypicker/react/style.css';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useEffect, useMemo } from 'react';
 import { useReservation } from './ReservationContext';
 import type { DateRange } from '@daypicker/react';
 import type { Cabin, Settings } from '../_lib/types';
@@ -66,13 +65,22 @@ function DateSelector({
   const {
     range,
     setRange,
-    numGuests,
     hasBreakfast,
     currentBookingRange,
     clearReservation,
+    configurePricing,
+    numNights,
+    totalPrice,
+    extrasPrice,
   } = useReservation();
 
   const { regularPrice, discount } = cabin;
+  const { minBookingLength, maxBookingLength, breakfastPrice } = settings;
+
+  useEffect(() => {
+    configurePricing({ regularPrice, discount, breakfastPrice });
+  }, [breakfastPrice, configurePricing, discount, regularPrice]);
+
   const currentBookingStart = currentBookingRange?.from;
   const currentBookingEnd = currentBookingRange?.to;
   const availableBookedDates = useMemo(
@@ -88,28 +96,16 @@ function DateSelector({
         : bookedDates,
     [bookedDates, currentBookingEnd, currentBookingStart],
   );
-  const displayRange: DateRange = isAlreadyBooked(range, availableBookedDates)
-    ? emptyRange
-    : range;
+  const hasUnavailableDates = isAlreadyBooked(range, availableBookedDates);
+  const displayRange: DateRange = hasUnavailableDates ? emptyRange : range;
+  const displayedNumNights = hasUnavailableDates ? 0 : numNights;
+  const displayedTotalPrice = hasUnavailableDates ? 0 : totalPrice;
+  const displayedExtrasPrice = hasUnavailableDates ? 0 : extrasPrice;
   const handleSelect = useCallback(
     (selectedRange: DateRange | undefined) =>
       setRange(selectedRange ?? emptyRange),
     [setRange],
   );
-  const numNights =
-    displayRange.from && displayRange.to
-      ? differenceInDays(displayRange.to, displayRange.from)
-      : 0;
-  const cabinPrice = numNights * (regularPrice - discount);
-
-  const { minBookingLength, maxBookingLength, breakfastPrice } = settings;
-  const extrasPrice = hasBreakfast
-    ? numNights * Number(numGuests) * breakfastPrice
-    : 0;
-  const totalPrice = cabinPrice + extrasPrice;
-  const extrasPice = hasBreakfast
-    ? breakfastPrice * Number(numGuests) * numNights
-    : 0;
 
   return (
     <div className='flex flex-col justify-between'>
@@ -136,17 +132,19 @@ function DateSelector({
             )}
             <span className=''>/night</span>
           </p>
-          {numNights ? (
+          {displayedNumNights ? (
             <>
               <p className='bg-accent-600 px-3 py-2 text-2xl'>
-                <span>&times;</span> <span>{numNights}</span>
+                <span>&times;</span> <span>{displayedNumNights}</span>
               </p>
               <p>
                 <span className='text-lg font-bold uppercase'>Total</span>{' '}
-                <span className='text-2xl font-semibold'>${totalPrice}</span>
-                {!!hasBreakfast && extrasPice > 0 ? (
+                <span className='text-2xl font-semibold'>
+                  ${displayedTotalPrice}
+                </span>
+                {!!hasBreakfast && displayedExtrasPrice > 0 ? (
                   <span className='block text-xs font-medium'>
-                    Includes ${extrasPice} breakfast
+                    Includes ${displayedExtrasPrice} breakfast
                   </span>
                 ) : null}
               </p>
