@@ -9,9 +9,12 @@ import {
 } from 'date-fns';
 import { DayPicker } from '@daypicker/react';
 import '@daypicker/react/style.css';
+import { memo, useCallback, useMemo } from 'react';
 import { useReservation } from './ReservationContext';
 import type { DateRange } from '@daypicker/react';
 import type { Cabin, Settings } from '../_lib/types';
+
+const emptyRange: DateRange = { from: undefined, to: undefined };
 
 function isAlreadyBooked(range: DateRange, datesArr: Date[]) {
   const { from, to } = range;
@@ -21,6 +24,36 @@ function isAlreadyBooked(range: DateRange, datesArr: Date[]) {
     datesArr.some(date => isWithinInterval(date, { start: from, end: to }))
   );
 }
+
+const ReservationDayPicker = memo(function ReservationDayPicker({
+  minBookingLength,
+  maxBookingLength,
+  selected,
+  bookedDates,
+  onSelect,
+}: {
+  minBookingLength: number;
+  maxBookingLength: number;
+  selected: DateRange;
+  bookedDates: Date[];
+  onSelect: (range: DateRange | undefined) => void;
+}) {
+  return (
+    <DayPicker
+      className='pt-5 place-self-center'
+      mode='range'
+      min={minBookingLength + 1}
+      max={maxBookingLength}
+      startMonth={new Date()}
+      selected={selected}
+      onSelect={onSelect}
+      disabled={curDate =>
+        isPast(curDate) ||
+        bookedDates.some(date => isSameDay(date, curDate))
+      }
+    />
+  );
+});
 
 function DateSelector({
   settings,
@@ -34,7 +67,6 @@ function DateSelector({
   const {
     range,
     setRange,
-    resetRange,
     numGuests,
     hasBreakfast,
     currentBookingRange,
@@ -44,19 +76,27 @@ function DateSelector({
   const { regularPrice, discount } = cabin;
   const currentBookingStart = currentBookingRange?.from;
   const currentBookingEnd = currentBookingRange?.to;
-  const availableBookedDates =
-    currentBookingStart && currentBookingEnd
-      ? bookedDates.filter(
-          date =>
-            !isWithinInterval(date, {
-              start: startOfDay(currentBookingStart),
-              end: endOfDay(currentBookingEnd),
-            }),
-        )
-      : bookedDates;
+  const availableBookedDates = useMemo(
+    () =>
+      currentBookingStart && currentBookingEnd
+        ? bookedDates.filter(
+            date =>
+              !isWithinInterval(date, {
+                start: startOfDay(currentBookingStart),
+                end: endOfDay(currentBookingEnd),
+              }),
+          )
+        : bookedDates,
+    [bookedDates, currentBookingEnd, currentBookingStart],
+  );
   const displayRange: DateRange = isAlreadyBooked(range, availableBookedDates)
-    ? { from: undefined, to: undefined }
+    ? emptyRange
     : range;
+  const handleSelect = useCallback(
+    (selectedRange: DateRange | undefined) =>
+      setRange(selectedRange ?? emptyRange),
+    [setRange],
+  );
   const numNights =
     displayRange.from && displayRange.to
       ? differenceInDays(displayRange.to, displayRange.from)
@@ -74,20 +114,12 @@ function DateSelector({
 
   return (
     <div className='flex flex-col justify-between'>
-      <DayPicker
-        className='pt-5 place-self-center'
-        mode='range'
-        min={minBookingLength + 1}
-        max={maxBookingLength}
-        startMonth={new Date()}
+      <ReservationDayPicker
+        minBookingLength={minBookingLength}
+        maxBookingLength={maxBookingLength}
         selected={displayRange}
-        onSelect={range =>
-          setRange(range ?? { from: undefined, to: undefined })
-        }
-        disabled={curDate =>
-          isPast(curDate) ||
-          availableBookedDates.some(date => isSameDay(date, curDate))
-        }
+        bookedDates={availableBookedDates}
+        onSelect={handleSelect}
       />
 
       <div className='flex items-center justify-between px-8 bg-accent-500 text-primary-800 h-[72px]'>
