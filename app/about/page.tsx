@@ -1,7 +1,6 @@
 import Image from 'next/image';
-import React, { Suspense } from 'react';
+import React from 'react';
 import image1 from '@/public/about-1.jpg';
-import image2 from '@/public/about-2.jpg';
 import { getCabins } from '../_lib/data-service';
 
 export const metadata = {
