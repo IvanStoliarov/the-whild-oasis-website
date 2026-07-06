@@ -101,12 +101,14 @@ export async function getGuest(email: string): Promise<Guest | null> {
   return data as Guest;
 }
 
-export async function getBooking(id: number | string): Promise<BookingRow> {
+export async function getBooking(
+  id: number | string,
+): Promise<BookingRow | null> {
   const { data, error } = await supabase
     .from('bookings')
     .select('*')
     .eq('id', Number(id))
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error(error);
