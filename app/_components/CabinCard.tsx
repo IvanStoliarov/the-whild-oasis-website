@@ -2,9 +2,21 @@ import { UsersIcon } from '@heroicons/react/24/solid';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { CabinSummary } from '../_lib/types';
+import RatingStars from './RatingStars';
 
 function CabinCard({ cabin }: { cabin: CabinSummary }) {
-  const { id, name, maxCapacity, regularPrice, discount, image } = cabin;
+  const {
+    id,
+    name,
+    maxCapacity,
+    regularPrice,
+    discount,
+    image,
+    rating,
+    reviewCount,
+  } = cabin;
+
+  const showRating = !!reviewCount && reviewCount > 0 && !!rating && rating > 0;
 
   return (
     <div className='lg:flex border-primary-800 border'>
@@ -45,6 +57,9 @@ function CabinCard({ cabin }: { cabin: CabinSummary }) {
             )}
             <span className='text-primary-200'>/ night</span>
           </p>
+          {showRating && (
+            <RatingStars rating={rating} reviewCount={reviewCount} />
+          )}
         </div>
 
         <div className='bg-primary-950 border-t border-t-primary-800 text-right'>
