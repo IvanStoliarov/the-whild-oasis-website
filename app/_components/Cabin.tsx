@@ -7,8 +7,8 @@ export default function Cabin({ cabin }: { cabin: CabinType }) {
   const { id, name, maxCapacity, regularPrice, discount, image, description } =
     cabin;
   return (
-    <div className='grid grid-cols-[3fr_4fr] gap-20 border border-primary-800 py-3 px-10 mb-24'>
-      <div className='relative scale-[1.15] -translate-x-3'>
+    <div className='grid md:grid-cols-[3fr_4fr] gap-20 border border-primary-800 py-3 px-5 md:px-10 mb-24'>
+      <div className='aspect-square md:aspect-auto relative md:scale-[1.15] md:-translate-x-3'>
         <Image
           fill
           src={image}
@@ -18,7 +18,7 @@ export default function Cabin({ cabin }: { cabin: CabinType }) {
       </div>
 
       <div>
-        <h3 className='text-accent-100 font-black text-7xl mb-5 translate-x-[-254px] bg-primary-950 p-6 pb-1 w-[150%]'>
+        <h3 className='text-accent-100 font-black text-4xl md:text-7xl mb-5 md:translate-x-[-254px] bg-primary-950 p-6 pb-1 md:w-[150%]'>
           Cabin {name}
         </h3>
 

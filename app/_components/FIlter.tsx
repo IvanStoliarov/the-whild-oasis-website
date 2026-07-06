@@ -6,35 +6,11 @@ import type { CapacityFilter } from '../_lib/types';
 
 export default function FIlter() {
   return (
-    <div className='border border-primary-500 flex'>
+    <div className='grid grid-cols-2 border w-full md:w-auto border-primary-500 md:flex'>
       <Button filterValue='all'>All Cabins</Button>
       <Button filterValue='small'>1&mdash;3 guests</Button>
       <Button filterValue='medium'>4&mdash;7 guests</Button>
       <Button filterValue='large'>8&mdash;12 guests</Button>
-      {/* <button
-        className='px-5 py-2 hover:bg-primary-700'
-        onClick={() => handleFilter('all')}
-      >
-        All Cabins
-      </button> */}
-      {/* <button
-        className='px-5 py-2 hover:bg-primary-700'
-        onClick={() => handleFilter('small')}
-      >
-        1&mdash;3 guests
-      </button> */}
-      {/* <button
-        className='px-5 py-2 hover:bg-primary-700'
-        onClick={() => handleFilter('medium')}
-      >
-        4&mdash;7 guests
-      </button>
-      <button
-        className='px-5 py-2 hover:bg-primary-700'
-        onClick={() => handleFilter('large')}
-      >
-        8&mdash;12 guests
-      </button> */}
     </div>
   );
 }

@@ -28,7 +28,7 @@ function ReservationCard({ booking, onDelete }: ReservationCardProps) {
   } = booking;
 
   return (
-    <div className='flex border border-primary-800'>
+    <div className='grid lg:flex border border-primary-800'>
       <div className='relative h-32 aspect-square'>
         <Image
           fill
@@ -74,12 +74,12 @@ function ReservationCard({ booking, onDelete }: ReservationCardProps) {
         </div>
       </div>
 
-      <div className='flex flex-col border-l border-primary-800 w-[100px]'>
+      <div className='flex lg:flex-col border-t lg:border-t-0 lg:border-l border-primary-800 lg:w-[100px]'>
         {!isPast(new Date(startDate)) && (
           <>
             <Link
               href={`/account/reservations/edit/${id}`}
-              className='group flex items-center gap-2 uppercase text-xs font-bold text-primary-300 border-b border-primary-800 flex-grow px-3 hover:bg-accent-600 transition-colors hover:text-primary-900'
+              className='flex-1 py-4 justify-center lg:justify-normal lg:py-0 lg:flex-auto group flex items-center gap-2 uppercase text-xs font-bold text-primary-300 border-r lg:border-r-0 lg:border-b border-primary-800 flex-grow px-3 hover:bg-accent-600 transition-colors hover:text-primary-900'
             >
               <PencilSquareIcon className='h-5 w-5 text-primary-600 group-hover:text-primary-800 transition-colors' />
               <span className='mt-1'>Edit</span>
