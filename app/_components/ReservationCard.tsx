@@ -4,6 +4,8 @@ import DeleteReservation from '@/app/_components/DeleteReservation';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { BookingWithCabin } from '../_lib/types';
+import RatingSubmit from './RatingSubmit';
+import RatingStars from './RatingStars';
 
 export const formatDistanceFromNow = (dateStr: string) =>
   formatDistance(parseISO(dateStr), new Date(), {
@@ -24,6 +26,7 @@ function ReservationCard({ booking, onDelete }: ReservationCardProps) {
     totalPrice,
     numGuests,
     created_at,
+    rating,
     cabins: { name, image },
   } = booking;
 
@@ -53,6 +56,17 @@ function ReservationCard({ booking, onDelete }: ReservationCardProps) {
             </span>
           )}
         </div>
+        {isPast(new Date(endDate)) ? (
+          rating ? (
+            <div className='items-center gap-2 py-2 flex'>
+              <span>Your rating: </span> <RatingStars rating={rating} />
+            </div>
+          ) : (
+            <div className='flex items-center gap-2 py-2'>
+              <RatingSubmit bookingId={id} />
+            </div>
+          )
+        ) : null}
 
         <p className='text-lg text-primary-300'>
           {format(new Date(startDate), 'EEE, MMM dd yyyy')} (
@@ -74,8 +88,8 @@ function ReservationCard({ booking, onDelete }: ReservationCardProps) {
         </div>
       </div>
 
-      <div className='flex lg:flex-col border-t lg:border-t-0 lg:border-l border-primary-800 lg:w-[100px]'>
-        {!isPast(new Date(startDate)) && (
+      <div className='flex lg:flex-col border-t lg:border-t-0 lg:border-l border-primary-800 w-auto'>
+        {!isPast(new Date(startDate)) ? (
           <>
             <Link
               href={`/account/reservations/edit/${id}`}
@@ -86,7 +100,7 @@ function ReservationCard({ booking, onDelete }: ReservationCardProps) {
             </Link>
             <DeleteReservation bookingId={id} onDelete={onDelete} />
           </>
-        )}
+        ) : null}
       </div>
     </div>
   );

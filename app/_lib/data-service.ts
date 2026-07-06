@@ -66,7 +66,7 @@ export async function getCabinPrice(id: number) {
 export async function getCabins(): Promise<CabinSummary[]> {
   const { data, error } = await supabase
     .from('cabins')
-    .select('id, name, maxCapacity, regularPrice, discount, image')
+    .select('id, name, maxCapacity, regularPrice, discount, image, rating, reviewCount')
     .order('name');
 
   if (error) {
@@ -123,7 +123,7 @@ export async function getBookings(
   const { data, error } = await supabase
     .from('bookings')
     .select(
-      'id, created_at, startDate, endDate, numNights, numGuests, totalPrice, guestId, cabinId, cabins(name, image)',
+      'id, created_at, startDate, endDate, numNights, numGuests, totalPrice, guestId, cabinId, cabins(name, image), rating',
     )
     .eq('guestId', guestId)
     .order('startDate');
