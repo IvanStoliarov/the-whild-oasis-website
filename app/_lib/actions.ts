@@ -14,6 +14,7 @@ import { format } from 'date-fns';
 import type { BookingData, BookingInsert, BookingWithCabin } from './types';
 import type { DateRange } from '@daypicker/react';
 import { calculateBookingPrice } from './booking-utils';
+import z from 'zod';
 
 function getFormString(formData: FormData, key: string): string {
   const value = formData.get(key);
@@ -33,7 +34,9 @@ async function getGuestReservation(
   unauthorizedMessage: string,
 ): Promise<BookingWithCabin> {
   const reservations = await getBookings(guestId);
-  const reservation = reservations.find(booking => booking.id === reservationId);
+  const reservation = reservations.find(
+    booking => booking.id === reservationId,
+  );
 
   if (!reservation) throw new Error(unauthorizedMessage);
   return reservation;
@@ -227,4 +230,47 @@ export async function createBooking(
   }
   revalidatePath(`/cabins/${bookingData.cabinId}`);
   redirect('/cabins/thankyou', RedirectType.push);
+}
+
+type RatingState = {
+  success: boolean;
+  message: string;
+};
+
+export async function submitRating(
+  previousState: RatingState,
+  formData: FormData,
+): Promise<RatingState> {
+  const submitDataSchema = z.object({
+    rating: z.coerce.number().int().min(1).max(5),
+    bookingId: z.coerce.number().int().positive(),
+  });
+  const result = submitDataSchema.safeParse(Object.fromEntries(formData));
+
+  if (!result.success)
+    return {
+      success: false,
+      message: z.prettifyError(result.error),
+    };
+
+  const { rating, bookingId } = result.data;
+  const session = await requireSession();
+  const { error } = await supabase.rpc('submit_booking_rating', {
+    booking_id: bookingId,
+    guest_id: session.user.guestId,
+    new_rating: rating,
+  });
+
+  if (error) {
+    return {
+      success: false,
+      message: error.message,
+    };
+  }
+
+  revalidatePath('/account/reservations');
+  return {
+    success: true,
+    message: `Rating ${rating}/5 submitted`,
+  };
 }

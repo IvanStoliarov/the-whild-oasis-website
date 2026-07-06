@@ -23,7 +23,7 @@ export type Cabin = Omit<
 
 export type CabinSummary = Pick<
   Cabin,
-  "id" | "name" | "maxCapacity" | "regularPrice" | "discount" | "image"
+  "id" | "name" | "maxCapacity" | "regularPrice" | "discount" | "image" | "rating" | "reviewCount"
 >;
 
 export type Settings = Omit<
@@ -51,6 +51,7 @@ export type BookingWithCabin = Pick<
   | "totalPrice"
   | "guestId"
   | "cabinId"
+  | "rating"
 > & {
   startDate: string;
   endDate: string;

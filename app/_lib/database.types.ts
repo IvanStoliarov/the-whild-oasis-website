@@ -28,6 +28,7 @@ export type Database = {
           numGuests: number | null
           numNights: number | null
           observations: string | null
+          rating: number | null
           startDate: string | null
           status: string | null
           totalPrice: number | null
@@ -45,6 +46,7 @@ export type Database = {
           numGuests?: number | null
           numNights?: number | null
           observations?: string | null
+          rating?: number | null
           startDate?: string | null
           status?: string | null
           totalPrice?: number | null
@@ -62,6 +64,7 @@ export type Database = {
           numGuests?: number | null
           numNights?: number | null
           observations?: string | null
+          rating?: number | null
           startDate?: string | null
           status?: string | null
           totalPrice?: number | null
@@ -184,7 +187,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      submit_booking_rating: {
+        Args: {
+          booking_id: number
+          guest_id: number
+          new_rating: number
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
