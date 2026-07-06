@@ -47,7 +47,15 @@ export default function ReservationUpdateForm({
     }
 
     return () => resetReservation();
-  }, []);
+  }, [
+    reservation.startDate,
+    reservation.endDate,
+    setCurrentBookingRange,
+    reservation.numGuests,
+    resetReservation,
+    setNumGuests,
+    setRange,
+  ]);
   return (
     <form
       className='bg-primary-900 py-4 px-6 md:py-8 md:px-12 text-lg flex gap-6 flex-col'

@@ -10,7 +10,7 @@ export default function BreakfastInput({ reservationHasBreakfast }: Props) {
 
   useEffect(() => {
     setHasBreakfast(reservationHasBreakfast);
-  }, []);
+  }, [reservationHasBreakfast, setHasBreakfast]);
   return (
     <>
       <input
