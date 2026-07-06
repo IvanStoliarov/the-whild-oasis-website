@@ -15,7 +15,10 @@ export default function RatingSubmit({ bookingId }: RatingSubmitProps) {
         </button>
       </Modal.Trigger>
       <Modal.Window>
-        <StarRating bookingId={bookingId} />
+        <>
+          <h3 className='text-primary-900 text-2xl mb-2'>Rate your stay</h3>
+          <StarRating bookingId={bookingId} />
+        </>
       </Modal.Window>
     </Modal>
   );
