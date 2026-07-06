@@ -3,9 +3,9 @@ import type { NextRequest } from 'next/server';
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { cabinId: string } },
+  { params }: { params: Promise<{ cabinId: string }> },
 ) {
-  const { cabinId } = params;
+  const { cabinId } = await params;
   try {
     const [cabin, bookedDates] = await Promise.all([
       getCabin(cabinId),
