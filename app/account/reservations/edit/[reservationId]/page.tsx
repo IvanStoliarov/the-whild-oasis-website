@@ -1,11 +1,9 @@
 import ReservationUpdateForm from '@/app/_components/ReservationUpdateForm';
-import SubmitButton from '@/app/_components/SubmitButton';
 import updateReservation from '@/app/_lib/actions';
 import { auth } from '@/app/_lib/auth';
 import {
   getBookedDatesByCabinId,
   getBooking,
-  getBookings,
   getCabin,
   getSettings,
 } from '@/app/_lib/data-service';
@@ -16,20 +14,21 @@ export default async function Page({
 }: {
   params: { reservationId: string };
 }) {
-  // CHANGE
   const reservationId = params.reservationId;
   const session = await auth();
   if (!session) redirect('/login');
-  const guestBookings = await getBookings(session.user.guestId);
-  const guestBookingsIds = guestBookings.map(booking => booking.id);
 
-  if (!guestBookingsIds.includes(Number(reservationId)))
-    return <div>No reservations find with id {reservationId}</div>;
+  const reservationNumber = Number(reservationId);
+  if (!Number.isInteger(reservationNumber) || reservationNumber < 1)
+    return <div>No reservations found with id {reservationId}</div>;
 
   const [settings, reservation] = await Promise.all([
     getSettings(),
-    getBooking(reservationId),
+    getBooking(reservationNumber),
   ]);
+
+  if (!reservation || reservation.guestId !== session.user.guestId)
+    return <div>No reservations found with id {reservationId}</div>;
 
   if (reservation.cabinId === null) throw new Error('Reservation has no cabin');
   const [cabin, bookedDates] = await Promise.all([
