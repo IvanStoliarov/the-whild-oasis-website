@@ -1,23 +1,16 @@
 'use client';
 
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/solid';
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { MouseEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
 type NavigationMenuProps = {
-  userImage?: string | null;
-  userName?: string | null;
   children: React.ReactNode;
 };
 
-export default function NavigationMenu({
-  userImage,
-  userName,
-  children,
-}: NavigationMenuProps) {
+export default function NavigationMenu({ children }: NavigationMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const pathname = usePathname();
