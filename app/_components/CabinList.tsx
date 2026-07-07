@@ -24,7 +24,7 @@ export default async function CabinList({
   const filter: CapacityFilter = filters.includes(capacity as CapacityFilter)
     ? (capacity as CapacityFilter)
     : 'all';
-  const cabins = await getCabins(filter);
+  const cabins = await getCabins();
 
   if (!cabins.length) return null;
 

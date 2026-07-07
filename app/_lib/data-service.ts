@@ -64,7 +64,7 @@ export async function getCabinPrice(id: number) {
   return { regularPrice: data.regularPrice, discount: data.discount };
 }
 
-export async function getCabins(filter='default'): Promise<CabinSummary[]> {
+export async function getCabins(): Promise<CabinSummary[]> {
   'use cache'
   cacheTag('cabins')
   const { data, error } = await supabase
