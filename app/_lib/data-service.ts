@@ -15,9 +15,7 @@ import type {
 } from './types';
 import { cacheLife, cacheTag } from 'next/cache';
 
-function requireCabin(
-  cabin: Awaited<ReturnType<typeof fetchCabin>>,
-): Cabin {
+function requireCabin(cabin: Awaited<ReturnType<typeof fetchCabin>>): Cabin {
   if (
     !cabin ||
     cabin.name === null ||
@@ -65,11 +63,14 @@ export async function getCabinPrice(id: number) {
 }
 
 export async function getCabins(): Promise<CabinSummary[]> {
-  'use cache'
-  cacheTag('cabins')
+  'use cache';
+  cacheLife('default');
+  cacheTag('cabins');
   const { data, error } = await supabase
     .from('cabins')
-    .select('id, name, maxCapacity, regularPrice, discount, image, rating, reviewCount')
+    .select(
+      'id, name, maxCapacity, regularPrice, discount, image, rating, reviewCount',
+    )
     .order('name');
 
   if (error) {
