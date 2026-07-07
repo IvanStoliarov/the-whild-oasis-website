@@ -65,7 +65,7 @@ export async function getCabinPrice(id: number) {
 }
 
 export async function getCabins(filter='default'): Promise<CabinSummary[]> {
-  'use cache: remote'
+  'use cache'
   cacheTag('cabins')
   const { data, error } = await supabase
     .from('cabins')
