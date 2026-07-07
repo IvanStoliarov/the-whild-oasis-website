@@ -10,11 +10,13 @@ import { useEffect, useRef, useState } from 'react';
 type NavigationMenuProps = {
   userImage?: string | null;
   userName?: string | null;
+  children: React.ReactNode;
 };
 
 export default function NavigationMenu({
   userImage,
   userName,
+  children,
 }: NavigationMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
@@ -57,10 +59,7 @@ export default function NavigationMenu({
     setIsOpen(false);
   }
 
-  function handleLinkClick(
-    event: MouseEvent<HTMLAnchorElement>,
-    href: string,
-  ) {
+  function handleLinkClick(event: MouseEvent<HTMLAnchorElement>, href: string) {
     if (
       event.button !== 0 ||
       event.metaKey ||
@@ -139,19 +138,9 @@ export default function NavigationMenu({
                       : ''
                   }`}
                   tabIndex={isOpen ? 0 : undefined}
-                  onClick={(event) => handleLinkClick(event, '/account')}
+                  onClick={event => handleLinkClick(event, '/account')}
                 >
-                  {userImage && (
-                    <span className='relative h-8 aspect-square'>
-                      <Image
-                        fill
-                        className='rounded-full object-cover'
-                        src={userImage}
-                        alt={userName ?? 'Guest'}
-                        referrerPolicy='no-referrer'
-                      />
-                    </span>
-                  )}
+                  {children}
                   <span>Guest area</span>
                 </Link>
               </li>
@@ -164,7 +153,7 @@ export default function NavigationMenu({
                       : ''
                   }`}
                   tabIndex={isOpen ? 0 : undefined}
-                  onClick={(event) => handleLinkClick(event, '/cabins')}
+                  onClick={event => handleLinkClick(event, '/cabins')}
                 >
                   Cabins
                 </Link>
@@ -178,7 +167,7 @@ export default function NavigationMenu({
                       : ''
                   }`}
                   tabIndex={isOpen ? 0 : undefined}
-                  onClick={(event) => handleLinkClick(event, '/about')}
+                  onClick={event => handleLinkClick(event, '/about')}
                 >
                   About
                 </Link>

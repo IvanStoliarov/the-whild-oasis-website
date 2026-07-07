@@ -1,13 +1,14 @@
-import { auth } from '../_lib/auth';
+import { Suspense } from 'react';
 import NavigationMenu from './NavigationMenu';
+import AccountAvatar from './AccountAvatar';
+import AccountAvatarPlaceholder from './AccountAvatarPlaceholder';
 
 export default async function Navigation() {
-  const session = await auth();
-
   return (
-    <NavigationMenu
-      userImage={session?.user?.image}
-      userName={session?.user?.name}
-    />
+    <NavigationMenu>
+      <Suspense fallback={<AccountAvatarPlaceholder />}>
+        <AccountAvatar />
+      </Suspense>
+    </NavigationMenu>
   );
 }
