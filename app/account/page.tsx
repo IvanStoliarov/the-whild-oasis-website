@@ -8,7 +8,7 @@ export const metadata = {
 
 export default async function Page() {
   const session = await auth();
-  if (!session?.user.name) redirect('/login');
+  if (!session?.user?.name) redirect('/login');
   const firstName = session.user.name.split(' ').at(0);
   return (
     <div>

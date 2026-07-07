@@ -10,17 +10,20 @@ export const metadata = {
 };
 
 // export const revalidate = 15;
-export const revalidate = 3600;
+// export const revalidate = 3600;
 
 const filters: CapacityFilter[] = ['all', 'small', 'medium', 'large'];
 
-export default function Page({
+export default async function Page({
   searchParams,
 }: {
-  searchParams?: { capacity?: string | string[] };
+  searchParams?: Promise<{ capacity?: string | string[] }>;
 }) {
+  const resolvedSearchParams = await searchParams;
   const capacity =
-    typeof searchParams?.capacity === 'string' ? searchParams.capacity : 'all';
+    typeof resolvedSearchParams?.capacity === 'string'
+      ? resolvedSearchParams.capacity
+      : 'all';
   const filter: CapacityFilter = filters.includes(capacity as CapacityFilter)
     ? (capacity as CapacityFilter)
     : 'all';

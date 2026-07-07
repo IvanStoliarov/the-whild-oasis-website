@@ -12,9 +12,9 @@ import { redirect } from 'next/navigation';
 export default async function Page({
   params,
 }: {
-  params: { reservationId: string };
+  params: Promise<{ reservationId: string }>;
 }) {
-  const reservationId = params.reservationId;
+  const { reservationId } = await params;
   const session = await auth();
   if (!session) redirect('/login');
 

@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { auth, signIn, signOut } from './auth';
 import { supabase } from './supabase';
 import {
@@ -268,6 +268,7 @@ export async function submitRating(
     };
   }
 
+  revalidateTag('cabins', 'max');
   revalidatePath('/account/reservations');
   return {
     success: true,

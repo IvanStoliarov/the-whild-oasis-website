@@ -4,10 +4,11 @@ import Spinner from '@/app/_components/Spinner';
 import { getCabin, getCabins } from '@/app/_lib/data-service';
 import { Suspense } from 'react';
 
-type CabinPageProps = { params: { cabinId: string } };
+type CabinPageProps = { params: Promise<{ cabinId: string }> };
 
 export async function generateMetadata({ params }: CabinPageProps) {
-  const { name } = await getCabin(params.cabinId);
+  const { cabinId } = await params;
+  const { name } = await getCabin(cabinId);
   return { title: `Cabin ${name}` };
 }
 
@@ -19,7 +20,8 @@ export async function generateStaticParams() {
 }
 
 export default async function Page({ params }: CabinPageProps) {
-  const cabin = await getCabin(params.cabinId);
+  const { cabinId } = await params;
+  const cabin = await getCabin(cabinId);
 
   return (
     <div className='max-w-6xl mx-auto mt-8'>

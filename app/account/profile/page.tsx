@@ -10,7 +10,7 @@ export const metadata = {
 
 export default async function Page() {
   const session = await auth();
-  if (!session?.user.email) redirect('/login');
+  if (!session?.user?.email) redirect('/login');
   const guest = await getGuest(session.user.email);
   if (!guest) throw new Error('Guest profile was not found');
   return (

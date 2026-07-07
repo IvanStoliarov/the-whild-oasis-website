@@ -41,7 +41,7 @@ function ReservationCard({ booking, onDelete }: ReservationCardProps) {
         />
       </div>
 
-      <div className='flex-grow px-6 py-3 flex flex-col'>
+      <div className='grow px-6 py-3 flex flex-col'>
         <div className='flex items-center justify-between'>
           <h3 className='text-xl font-semibold'>
             {numNights} nights in Cabin {name}
@@ -93,7 +93,7 @@ function ReservationCard({ booking, onDelete }: ReservationCardProps) {
           <>
             <Link
               href={`/account/reservations/edit/${id}`}
-              className='flex-1 py-4 justify-center lg:justify-normal lg:py-0 lg:flex-auto group flex items-center gap-2 uppercase text-xs font-bold text-primary-300 border-r lg:border-r-0 lg:border-b border-primary-800 flex-grow px-3 hover:bg-accent-600 transition-colors hover:text-primary-900'
+              className='flex-1 py-4 justify-center lg:justify-normal lg:py-0 lg:flex-auto group flex items-center gap-2 uppercase text-xs font-bold text-primary-300 border-r lg:border-r-0 lg:border-b border-primary-800 grow px-3 hover:bg-accent-600 transition-colors hover:text-primary-900'
             >
               <PencilSquareIcon className='h-5 w-5 text-primary-600 group-hover:text-primary-800 transition-colors' />
               <span className='mt-1'>Edit</span>
