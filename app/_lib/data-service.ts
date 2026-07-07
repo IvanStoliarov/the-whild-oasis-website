@@ -13,6 +13,7 @@ import type {
   GuestUpdate,
   Settings,
 } from './types';
+import { cacheLife, cacheTag } from 'next/cache';
 
 function requireCabin(
   cabin: Awaited<ReturnType<typeof fetchCabin>>,
@@ -64,6 +65,8 @@ export async function getCabinPrice(id: number) {
 }
 
 export async function getCabins(): Promise<CabinSummary[]> {
+  'use cache'
+  cacheTag('cabins')
   const { data, error } = await supabase
     .from('cabins')
     .select('id, name, maxCapacity, regularPrice, discount, image, rating, reviewCount')
