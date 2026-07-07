@@ -4,7 +4,6 @@ import Spinner from '@/app/_components/Spinner';
 import FIlter from '@/app/_components/FIlter';
 import ReservationReminder from '../_components/ReservationReminder';
 import type { CapacityFilter } from '../_lib/types';
-import { cacheLife } from 'next/cache';
 
 export const metadata = {
   title: 'Cabins',
@@ -20,8 +19,6 @@ export default async function Page({
 }: {
   searchParams?: Promise<{ capacity?: string | string[] }>;
 }) {
-  'use cache';
-  cacheLife('hours');
   const resolvedSearchParams = await searchParams;
   const capacity =
     typeof resolvedSearchParams?.capacity === 'string'
