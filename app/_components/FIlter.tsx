@@ -34,7 +34,7 @@ function Button({
   }
   return (
     <button
-      className={`px-5 py-2 hover:bg-primary-700 ${filterValue === currentFilter ? 'bg-primary-700 text-primary-50' : ''}`}
+      className={`px-5 py-2 hover:bg-primary-700 ${filterValue === currentFilter ? 'bg-primary-700 text-primary-50' : 'hover:cursor-pointer'}`}
       onClick={() => handleFilter(filterValue)}
     >
       {children}
