@@ -12,21 +12,11 @@ export const metadata = {
 // export const revalidate = 15;
 // export const revalidate = 3600;
 
-const filters: CapacityFilter[] = ['all', 'small', 'medium', 'large'];
-
 export default async function Page({
   searchParams,
 }: {
   searchParams?: Promise<{ capacity?: string | string[] }>;
 }) {
-  const resolvedSearchParams = await searchParams;
-  const capacity =
-    typeof resolvedSearchParams?.capacity === 'string'
-      ? resolvedSearchParams.capacity
-      : 'all';
-  const filter: CapacityFilter = filters.includes(capacity as CapacityFilter)
-    ? (capacity as CapacityFilter)
-    : 'all';
   return (
     <div>
       <h1 className='text-4xl mb-5 text-accent-400 font-medium'>
@@ -43,8 +33,8 @@ export default async function Page({
       <div className='flex justify-end mb-8'>
         <FIlter />
       </div>
-      <Suspense fallback={<Spinner />} key={filter}>
-        <CabinList filter={filter} />
+      <Suspense fallback={<Spinner />}>
+        <CabinList searchParamsPromise={searchParams} />
         <ReservationReminder />
       </Suspense>
     </div>

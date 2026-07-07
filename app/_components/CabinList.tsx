@@ -3,7 +3,27 @@ import CabinCard from '@/app/_components/CabinCard';
 import { getCabins } from '@/app/_lib/data-service';
 import type { CapacityFilter } from '../_lib/types';
 
-export default async function CabinList({ filter }: { filter: CapacityFilter }) {
+interface CabinListProps {
+  searchParamsPromise:
+    | Promise<{
+        capacity?: string | string[];
+      }>
+    | undefined;
+}
+
+const filters: CapacityFilter[] = ['all', 'small', 'medium', 'large'];
+
+export default async function CabinList({
+  searchParamsPromise,
+}: CabinListProps) {
+  const resolvedSearchParams = await searchParamsPromise;
+  const capacity =
+    typeof resolvedSearchParams?.capacity === 'string'
+      ? resolvedSearchParams.capacity
+      : 'all';
+  const filter: CapacityFilter = filters.includes(capacity as CapacityFilter)
+    ? (capacity as CapacityFilter)
+    : 'all';
   const cabins = await getCabins();
 
   if (!cabins.length) return null;
