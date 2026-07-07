@@ -3,8 +3,8 @@ import { auth } from '../_lib/auth';
 
 export default async function AccountAvatar() {
   const session = await auth();
-  const userImage = session?.user.image;
-  const userName = session?.user.name;
+  const userImage = session?.user?.image;
+  const userName = session?.user?.name;
   return (
     <>
       {userImage && userImage?.length > 0 && (
