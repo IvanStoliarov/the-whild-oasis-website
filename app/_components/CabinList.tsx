@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import CabinCard from '@/app/_components/CabinCard';
 import { getCabins } from '@/app/_lib/data-service';
-import type { CapacityFilter } from '../_lib/types';
+import type { CabinSummary, CapacityFilter } from '../_lib/types';
+import Spinner from './Spinner';
+import { cacheLife, cacheTag } from 'next/cache';
 
 interface CabinListProps {
   searchParamsPromise:
@@ -24,7 +26,19 @@ export default async function CabinList({
   const filter: CapacityFilter = filters.includes(capacity as CapacityFilter)
     ? (capacity as CapacityFilter)
     : 'all';
-  const cabins = await getCabins(filter);
+
+  return (
+    <Suspense key={filter} fallback={<Spinner />}>
+      <CabinsGrid filter={filter} />
+    </Suspense>
+  );
+}
+
+async function CabinsGrid({ filter }: { filter: string }) {
+  'use cache';
+  cacheLife('default');
+  cacheTag('cabins');
+  const cabins = await getCabins();
 
   if (!cabins.length) return null;
 
@@ -40,7 +54,6 @@ export default async function CabinList({
   if (filter === 'large') {
     displayedCabins = cabins.filter(cabin => cabin.maxCapacity >= 8);
   }
-
   return (
     <div className='grid sm:grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 xl:gap-14'>
       {displayedCabins.map(cabin => (

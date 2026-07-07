@@ -2,7 +2,7 @@ import Image from 'next/image';
 import image1 from '@/public/about-1.jpg';
 import { getCabins } from '../_lib/data-service';
 import Link from 'next/link';
-import { cacheLife } from 'next/cache';
+import { cacheLife, cacheTag } from 'next/cache';
 
 export const metadata = {
   title: 'About',
@@ -12,6 +12,7 @@ export const metadata = {
 
 export default async function Page() {
   'use cache';
+  cacheTag('cabins');
   cacheLife('days');
   const cabins = await getCabins();
   return (

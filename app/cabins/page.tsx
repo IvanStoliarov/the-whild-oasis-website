@@ -1,9 +1,8 @@
-import React, { Suspense } from 'react';
+import { Suspense } from 'react';
 import CabinList from '@/app/_components/CabinList';
 import Spinner from '@/app/_components/Spinner';
 import FIlter from '@/app/_components/FIlter';
 import ReservationReminder from '../_components/ReservationReminder';
-import type { CapacityFilter } from '../_lib/types';
 
 export const metadata = {
   title: 'Cabins',
@@ -35,8 +34,8 @@ export default async function Page({
       </div>
       <Suspense fallback={<Spinner />}>
         <CabinList searchParamsPromise={searchParams} />
-        <ReservationReminder />
       </Suspense>
+      <ReservationReminder />
     </div>
   );
 }
