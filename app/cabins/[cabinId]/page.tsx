@@ -25,7 +25,9 @@ export default async function Page({ params }: CabinPageProps) {
 
   return (
     <div className='max-w-6xl mx-auto mt-8'>
-      <Cabin cabin={cabin} />
+      <Suspense fallback={<Spinner />}>
+        <Cabin cabin={cabin} />
+      </Suspense>
 
       <div>
         <h2 className='text-5xl font-semibold text-center mb-10 text-accent-400'>
