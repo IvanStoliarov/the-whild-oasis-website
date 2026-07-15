@@ -1,6 +1,7 @@
 'use client';
 import {
   CalendarDaysIcon,
+  HeartIcon,
   HomeIcon,
   UserIcon,
 } from '@heroicons/react/24/solid';
@@ -18,6 +19,11 @@ const navLinks = [
     name: 'Reservations',
     href: '/account/reservations',
     icon: <CalendarDaysIcon className='h-5 w-5 text-primary-600' />,
+  },
+  {
+    name: 'Wishlist',
+    href: '/account/wishlist',
+    icon: <HeartIcon className='h-5 w-5 text-primary-600' />,
   },
   {
     name: 'Guest profile',

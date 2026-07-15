@@ -63,13 +63,20 @@ export async function getCabinPrice(id: number) {
   return { regularPrice: data.regularPrice, discount: data.discount };
 }
 
-export async function getCabins(): Promise<CabinSummary[]> {
-  const { data, error } = await supabase
+export async function getCabins(
+  ids?: readonly number[],
+): Promise<CabinSummary[]> {
+  if (ids?.length === 0) return [];
+
+  let query = supabase
     .from('cabins')
     .select(
       'id, name, maxCapacity, regularPrice, discount, image, rating, reviewCount',
-    )
-    .order('name');
+    );
+
+  if (ids) query = query.in('id', ids);
+
+  const { data, error } = await query.order('name');
 
   if (error) {
     console.error(error);

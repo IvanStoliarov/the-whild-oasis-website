@@ -284,13 +284,13 @@ export async function submitRating(
 export async function addToWishlist(
   cabinId: number,
   previousState: WishlistState,
-  formData: FormData| null,
+  formData: FormData | null,
 ): Promise<WishlistState> {
   if (!formData) {
     return {
       success: false,
-      message: ''
-    }
+      message: '',
+    };
   }
   const submitSchemaData = z.object({
     isInWishlist: z.stringbool(),
@@ -330,6 +330,12 @@ export async function addToWishlist(
       isInWishlist: previousState.isInWishlist,
     };
   }
+
+  revalidatePath('/account/wishlist')
+  revalidatePath('/cabins')
+  revalidatePath(`/cabins/${cabinId}`)
+
+  console.log('success')
 
   return {
     success: true,
