@@ -1,9 +1,10 @@
 import React, { Suspense } from 'react';
 import CabinCard from '@/app/_components/CabinCard';
-import { getCabins } from '@/app/_lib/data-service';
-import type { CabinSummary, CapacityFilter } from '../_lib/types';
+import { getCabins, getWishlistItems } from '@/app/_lib/data-service';
+import type { CapacityFilter } from '../_lib/types';
 import Spinner from './Spinner';
 import { cacheLife, cacheTag } from 'next/cache';
+import { auth } from '../_lib/auth';
 
 interface CabinListProps {
   searchParamsPromise:
@@ -27,18 +28,33 @@ export default async function CabinList({
     ? (capacity as CapacityFilter)
     : 'all';
 
+  const session = await auth();
+  const userWishlist = session
+    ? await getWishlistItems(session.user.guestId)
+    : [];
+  const isLoggedIn = !!session?.user;
   return (
     <Suspense key={filter} fallback={<Spinner />}>
-      <CabinsGrid filter={filter} />
+      <CabinsGrid
+        isLoggedIn={isLoggedIn}
+        userWishlist={userWishlist}
+        filter={filter}
+      />
     </Suspense>
   );
 }
 
-async function CabinsGrid({ filter }: { filter: string }) {
-  'use cache';
-  cacheLife('default');
-  cacheTag('cabins');
-  const cabins = await getCabins();
+async function CabinsGrid({
+  filter,
+  userWishlist,
+  isLoggedIn,
+}: {
+  filter: string;
+  userWishlist: { cabinId: number }[];
+  isLoggedIn: boolean;
+}) {
+  const cabins = await getCachedCabins();
+  const cabinsInWishlist = new Set(userWishlist.map(item => item.cabinId));
 
   if (!cabins.length) return null;
 
@@ -57,8 +73,20 @@ async function CabinsGrid({ filter }: { filter: string }) {
   return (
     <div className='grid sm:grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 xl:gap-14'>
       {displayedCabins.map(cabin => (
-        <CabinCard cabin={cabin} key={cabin.id} />
+        <CabinCard
+          cabinsInWishlist={cabinsInWishlist}
+          isLoggedIn={isLoggedIn}
+          cabin={cabin}
+          key={cabin.id}
+        />
       ))}
     </div>
   );
+}
+
+async function getCachedCabins() {
+  'use cache';
+  cacheLife('default');
+  cacheTag('cabins');
+  return getCabins();
 }

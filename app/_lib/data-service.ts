@@ -12,6 +12,7 @@ import type {
   GuestInsert,
   GuestUpdate,
   Settings,
+  WishlistRow,
 } from './types';
 import { cacheLife, cacheTag } from 'next/cache';
 
@@ -62,13 +63,20 @@ export async function getCabinPrice(id: number) {
   return { regularPrice: data.regularPrice, discount: data.discount };
 }
 
-export async function getCabins(): Promise<CabinSummary[]> {
-  const { data, error } = await supabase
+export async function getCabins(
+  ids?: readonly number[],
+): Promise<CabinSummary[]> {
+  if (ids?.length === 0) return [];
+
+  let query = supabase
     .from('cabins')
     .select(
       'id, name, maxCapacity, regularPrice, discount, image, rating, reviewCount',
-    )
-    .order('name');
+    );
+
+  if (ids) query = query.in('id', ids);
+
+  const { data, error } = await query.order('name');
 
   if (error) {
     console.error(error);
@@ -250,4 +258,22 @@ export async function deleteBooking(id: number) {
     throw new Error('Booking could not be deleted');
   }
   return data;
+}
+
+export async function getWishlistItems(
+  guestId: number,
+): Promise<Pick<WishlistRow, 'cabinId'>[]> {
+  const { data: wishlist_items, error } = await supabase
+    .from('wishlist_items')
+    .select('cabinId')
+    .eq('guestId', guestId);
+
+  if (error) {
+    console.log(error);
+    throw new Error(
+      'Something went wrong while fetching wishlist items for guest',
+    );
+  }
+
+  return wishlist_items;
 }

@@ -182,17 +182,49 @@ export type Database = {
         }
         Relationships: []
       }
+      wishlist_items: {
+        Row: {
+          cabinId: number
+          created_at: string
+          guestId: number
+          id: number
+        }
+        Insert: {
+          cabinId: number
+          created_at?: string
+          guestId: number
+          id?: number
+        }
+        Update: {
+          cabinId?: number
+          created_at?: string
+          guestId?: number
+          id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishlist_items_cabinId_fkey"
+            columns: ["cabinId"]
+            isOneToOne: false
+            referencedRelation: "cabins"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wishlist_items_guestId_fkey"
+            columns: ["guestId"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
       submit_booking_rating: {
-        Args: {
-          booking_id: number
-          guest_id: number
-          new_rating: number
-        }
+        Args: { booking_id: number; guest_id: number; new_rating: number }
         Returns: undefined
       }
     }
