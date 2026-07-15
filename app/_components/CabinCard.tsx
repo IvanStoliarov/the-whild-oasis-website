@@ -4,16 +4,10 @@ import Link from 'next/link';
 import type { CabinSummary } from '../_lib/types';
 import RatingStars from './RatingStars';
 import AddToWishlistButton from './AddToWishlistButton';
+import { auth } from '../_lib/auth';
+import { getWishlistItems } from '../_lib/data-service';
 
-function CabinCard({
-  cabin,
-  cabinsInWishlist,
-  isLoggedIn,
-}: {
-  cabin: CabinSummary;
-  cabinsInWishlist: Set<number>;
-  isLoggedIn: boolean;
-}) {
+async function CabinCard({ cabin }: { cabin: CabinSummary }) {
   const {
     id,
     name,
@@ -24,6 +18,14 @@ function CabinCard({
     rating,
     reviewCount,
   } = cabin;
+
+  const session = await auth();
+  const isLoggedIn = session?.user.guestId;
+  const userWishlist = session
+    ? await getWishlistItems(session.user.guestId)
+    : [];
+
+  const cabinsInWishlist = new Set(userWishlist.map(el => el.cabinId));
 
   const showRating = !!reviewCount && reviewCount > 0 && !!rating && rating > 0;
 

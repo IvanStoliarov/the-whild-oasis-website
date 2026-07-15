@@ -11,6 +11,7 @@ export default async function AccountAvatar() {
         <span className='relative h-8 aspect-square'>
           <Image
             fill
+            sizes='32px'
             className='rounded-full object-cover'
             src={userImage}
             alt={userName ?? 'Guest'}

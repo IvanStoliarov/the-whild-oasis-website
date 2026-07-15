@@ -14,7 +14,7 @@ import type {
   Settings,
   WishlistRow,
 } from './types';
-import { cacheLife, cacheTag } from 'next/cache';
+import { cache } from 'react';
 
 function requireCabin(cabin: Awaited<ReturnType<typeof fetchCabin>>): Cabin {
   if (
@@ -97,18 +97,28 @@ export async function getCabins(
   });
 }
 
-export async function getGuest(email: string): Promise<Guest | null> {
-  const { data } = await supabase
-    .from('guests')
-    .select('*')
-    .eq('email', email)
-    .single();
+export const getGuest = cache(
+  async (email: string): Promise<Guest | null> => {
+    const { data, error } = await supabase
+      .from('guests')
+      .select('*')
+      .eq('email', email)
+      .maybeSingle();
 
-  if (!data) return null;
-  if (data.email === null || data.fullName === null)
-    throw new Error('Guest data is incomplete');
-  return data as Guest;
-}
+    if (error) {
+      console.error(error);
+      throw new Error('Guest could not be loaded');
+    }
+
+    if (!data) return null;
+
+    if (data.email === null || data.fullName === null) {
+      throw new Error('Guest data is incomplete');
+    }
+
+    return data as Guest;
+  },
+);
 
 export async function getBooking(
   id: number | string,
@@ -260,20 +270,22 @@ export async function deleteBooking(id: number) {
   return data;
 }
 
-export async function getWishlistItems(
-  guestId: number,
-): Promise<Pick<WishlistRow, 'cabinId'>[]> {
-  const { data: wishlist_items, error } = await supabase
-    .from('wishlist_items')
-    .select('cabinId')
-    .eq('guestId', guestId);
+export const getWishlistItems = cache(
+  async (
+    guestId: number,
+  ): Promise<Pick<WishlistRow, 'cabinId'>[]> => {
+    const { data, error } = await supabase
+      .from('wishlist_items')
+      .select('cabinId')
+      .eq('guestId', guestId);
 
-  if (error) {
-    console.log(error);
-    throw new Error(
-      'Something went wrong while fetching wishlist items for guest',
-    );
-  }
+    if (error) {
+      console.error(error);
+      throw new Error(
+        'Something went wrong while fetching wishlist items for guest',
+      );
+    }
 
-  return wishlist_items;
-}
+    return data;
+  },
+);
