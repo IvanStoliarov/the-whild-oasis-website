@@ -17,6 +17,12 @@ const nextConfig = {
       },
     ],
   },
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
+    browserToTerminal: true,
+  },
   // output: 'export'
 };
 

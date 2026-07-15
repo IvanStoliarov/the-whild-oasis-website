@@ -335,7 +335,6 @@ export async function addToWishlist(
   revalidatePath('/cabins')
   revalidatePath(`/cabins/${cabinId}`)
 
-  console.log('success')
 
   return {
     success: true,
