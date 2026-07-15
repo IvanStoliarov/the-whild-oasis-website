@@ -28,34 +28,15 @@ export default async function CabinList({
     ? (capacity as CapacityFilter)
     : 'all';
 
-  const session = await auth();
-  const userWishlist = session
-    ? await getWishlistItems(session.user.guestId)
-    : [];
-  const isLoggedIn = !!session?.user;
   return (
     <Suspense key={filter} fallback={<Spinner />}>
-      <CabinsGrid
-        isLoggedIn={isLoggedIn}
-        userWishlist={userWishlist}
-        filter={filter}
-      />
+      <CabinsGrid filter={filter} />
     </Suspense>
   );
 }
 
-async function CabinsGrid({
-  filter,
-  userWishlist,
-  isLoggedIn,
-}: {
-  filter: string;
-  userWishlist: { cabinId: number }[];
-  isLoggedIn: boolean;
-}) {
+async function CabinsGrid({ filter }: { filter: string }) {
   const cabins = await getCachedCabins();
-  const cabinsInWishlist = new Set(userWishlist.map(item => item.cabinId));
-
   if (!cabins.length) return null;
 
   let displayedCabins = cabins;
@@ -73,12 +54,7 @@ async function CabinsGrid({
   return (
     <div className='grid sm:grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 xl:gap-14'>
       {displayedCabins.map(cabin => (
-        <CabinCard
-          cabinsInWishlist={cabinsInWishlist}
-          isLoggedIn={isLoggedIn}
-          cabin={cabin}
-          key={cabin.id}
-        />
+        <CabinCard cabin={cabin} key={cabin.id} />
       ))}
     </div>
   );
