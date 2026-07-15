@@ -8,6 +8,7 @@ export type GuestInsert = TablesInsert<"guests">;
 export type BookingInsert = TablesInsert<"bookings">;
 export type BookingUpdate = TablesUpdate<"bookings">;
 export type GuestUpdate = TablesUpdate<"guests">;
+export type WishlistRow = Tables<"wishlist_items">;
 
 export type Cabin = Omit<
   CabinRow,

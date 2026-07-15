@@ -12,6 +12,7 @@ import type {
   GuestInsert,
   GuestUpdate,
   Settings,
+  WishlistRow,
 } from './types';
 import { cacheLife, cacheTag } from 'next/cache';
 
@@ -250,4 +251,22 @@ export async function deleteBooking(id: number) {
     throw new Error('Booking could not be deleted');
   }
   return data;
+}
+
+export async function getWishlistItems(
+  guestId: number,
+): Promise<Pick<WishlistRow, 'cabinId'>[]> {
+  const { data: wishlist_items, error } = await supabase
+    .from('wishlist_items')
+    .select('cabinId')
+    .eq('guestId', guestId);
+
+  if (error) {
+    console.log(error);
+    throw new Error(
+      'Something went wrong while fetching wishlist items for guest',
+    );
+  }
+
+  return wishlist_items;
 }

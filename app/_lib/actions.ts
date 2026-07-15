@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath, revalidateTag } from 'next/cache';
+import { refresh, revalidatePath, revalidateTag, updateTag } from 'next/cache';
 import { auth, signIn, signOut } from './auth';
 import { supabase } from './supabase';
 import {
@@ -10,6 +10,7 @@ import {
   getSettings,
 } from './data-service';
 import { redirect, RedirectType } from 'next/navigation';
+import { after } from 'next/server';
 import { format } from 'date-fns';
 import type { BookingData, BookingInsert, BookingWithCabin } from './types';
 import type { DateRange } from '@daypicker/react';
@@ -237,6 +238,10 @@ type RatingState = {
   message: string;
 };
 
+export type WishlistState = RatingState & {
+  isInWishlist?: boolean;
+};
+
 export async function submitRating(
   previousState: RatingState,
   formData: FormData,
@@ -273,5 +278,62 @@ export async function submitRating(
   return {
     success: true,
     message: `Rating ${rating}/5 submitted`,
+  };
+}
+
+export async function addToWishlist(
+  cabinId: number,
+  previousState: WishlistState,
+  formData: FormData| null,
+): Promise<WishlistState> {
+  if (!formData) {
+    return {
+      success: false,
+      message: ''
+    }
+  }
+  const submitSchemaData = z.object({
+    isInWishlist: z.stringbool(),
+  });
+  const result = submitSchemaData.safeParse(Object.fromEntries(formData));
+  if (!result.success)
+    return {
+      success: false,
+      message: z.prettifyError(result.error),
+      isInWishlist: previousState.isInWishlist,
+    };
+  const session = await requireSession();
+  const { isInWishlist } = result.data;
+
+  let error;
+
+  if (isInWishlist) {
+    const { error: removeFromWishlistError } = await supabase
+      .from('wishlist_items')
+      .delete()
+      .eq('cabinId', cabinId)
+      .eq('guestId', session.user.guestId);
+    error = removeFromWishlistError;
+  } else {
+    const { error: addToWishlistError } = await supabase
+      .from('wishlist_items')
+      .insert([{ guestId: session.user.guestId, cabinId }]);
+
+    error = addToWishlistError;
+  }
+
+  if (error) {
+    console.log(error);
+    return {
+      success: false,
+      message: "Couldn't update wishlist",
+      isInWishlist: previousState.isInWishlist,
+    };
+  }
+
+  return {
+    success: true,
+    message: '',
+    isInWishlist: !isInWishlist,
   };
 }
