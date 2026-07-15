@@ -36,6 +36,7 @@ async function CabinCard({ cabin }: { cabin: CabinSummary }) {
       <div className='flex-1 relative aspect-square'>
         <Image
           src={image}
+          sizes='(width >= 1024px) 25vw, (width >= 768px) 50vw, 100vw'
           fill
           alt={`Cabin ${name}`}
           className='object-cover border-r border-primary-800'

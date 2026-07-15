@@ -17,6 +17,7 @@ export default function ReservationFormHeader({ user }: Props) {
           {user.image ? (
             <Image
               fill
+              sizes='32px'
               referrerPolicy='no-referrer'
               className='rounded-full object-cover'
               src={user.image}

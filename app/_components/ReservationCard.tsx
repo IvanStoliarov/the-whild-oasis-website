@@ -35,6 +35,7 @@ function ReservationCard({ booking, onDelete }: ReservationCardProps) {
       <div className='relative h-32 aspect-square'>
         <Image
           fill
+          sizes='128px'
           src={image}
           alt={`Cabin ${name}`}
           className='object-cover border-r border-primary-800'
