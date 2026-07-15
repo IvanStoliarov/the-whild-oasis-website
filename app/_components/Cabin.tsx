@@ -20,6 +20,7 @@ export default async function Cabin({ cabin }: { cabin: CabinType }) {
         <Image
           fill
           src={image}
+          sizes='(width >= 768px) 35vw, 100vw'
           className='object-cover'
           alt={`Cabin ${name}`}
         />
