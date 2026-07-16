@@ -1,18 +1,22 @@
 import Image from 'next/image';
-import React from 'react';
 import image1 from '@/public/about-1.jpg';
 import { getCabins } from '../_lib/data-service';
+import Link from 'next/link';
+import { cacheLife, cacheTag } from 'next/cache';
 
 export const metadata = {
   title: 'About',
 };
 
-export const revalidate = 86400;
+// export const revalidate = 86400;
 
 export default async function Page() {
+  'use cache';
+  cacheTag('cabins');
+  cacheLife('days');
   const cabins = await getCabins();
   return (
-    <div className='grid grid-cols-5 gap-x-24 gap-y-32 text-lg items-center'>
+    <div className='flex flex-col md:grid grid-cols-5 gap-5 md:gap-x-24 md:gap-y-32 text-lg items-center'>
       <div className='col-span-3'>
         <h1 className='text-4xl mb-10 text-accent-400 font-medium'>
           Welcome to The Wild Oasis
@@ -40,19 +44,22 @@ export default async function Page() {
         </div>
       </div>
 
-      <div className='col-span-2'>
+      <div className='col-span-2 relative aspect-square w-full'>
         <Image
           src={image1}
+          sizes='(width >= 768px) 35vw, 100vw'
+          fill
           alt='Family sitting around a fire pit in front of cabin'
           quality={80}
         />
       </div>
 
-      <div className='col-span-2 relative aspect-square'>
+      <div className='col-span-2 relative aspect-square w-full'>
         <Image
           className='object-cover'
           src='/about-2.jpg'
           fill
+          sizes='(width >= 768px) 35vw, 100vw'
           alt='Family that manages The Wild Oasis'
         />
       </div>
@@ -79,12 +86,12 @@ export default async function Page() {
           </p>
 
           <div>
-            <a
+            <Link
               href='/cabins'
               className='inline-block mt-4 bg-accent-500 px-8 py-5 text-primary-800 text-lg font-semibold hover:bg-accent-600 transition-all'
             >
               Explore our luxury cabins
-            </a>
+            </Link>
           </div>
         </div>
       </div>

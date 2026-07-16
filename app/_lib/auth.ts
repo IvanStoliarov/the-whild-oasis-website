@@ -10,10 +10,10 @@ export const {
 } = NextAuth({
   providers: [Google],
   callbacks: {
-    authorized({ auth, request }) {
+    authorized({ auth }) {
       return !!auth?.user;
     },
-    async signIn({ user, account, profile }) {
+    async signIn({ user }) {
       try {
         if (!user.email) return false;
         const existingGuest = await getGuest(user.email);
@@ -26,7 +26,7 @@ export const {
         return false;
       }
     },
-    async session({ session, user }) {
+    async session({ session }) {
       if (!session.user.email) throw new Error('Authenticated user has no email');
       const guest = await getGuest(session.user.email);
       if (!guest) throw new Error('Authenticated guest was not found');

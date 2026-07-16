@@ -12,11 +12,11 @@ import type {
   GuestInsert,
   GuestUpdate,
   Settings,
+  WishlistRow,
 } from './types';
+import { cache } from 'react';
 
-function requireCabin(
-  cabin: Awaited<ReturnType<typeof fetchCabin>>,
-): Cabin {
+function requireCabin(cabin: Awaited<ReturnType<typeof fetchCabin>>): Cabin {
   if (
     !cabin ||
     cabin.name === null ||
@@ -63,11 +63,20 @@ export async function getCabinPrice(id: number) {
   return { regularPrice: data.regularPrice, discount: data.discount };
 }
 
-export async function getCabins(): Promise<CabinSummary[]> {
-  const { data, error } = await supabase
+export async function getCabins(
+  ids?: readonly number[],
+): Promise<CabinSummary[]> {
+  if (ids?.length === 0) return [];
+
+  let query = supabase
     .from('cabins')
-    .select('id, name, maxCapacity, regularPrice, discount, image, rating, reviewCount')
-    .order('name');
+    .select(
+      'id, name, maxCapacity, regularPrice, discount, image, rating, reviewCount',
+    );
+
+  if (ids) query = query.in('id', ids);
+
+  const { data, error } = await query.order('name');
 
   if (error) {
     console.error(error);
@@ -88,18 +97,28 @@ export async function getCabins(): Promise<CabinSummary[]> {
   });
 }
 
-export async function getGuest(email: string): Promise<Guest | null> {
-  const { data } = await supabase
-    .from('guests')
-    .select('*')
-    .eq('email', email)
-    .single();
+export const getGuest = cache(
+  async (email: string): Promise<Guest | null> => {
+    const { data, error } = await supabase
+      .from('guests')
+      .select('*')
+      .eq('email', email)
+      .maybeSingle();
 
-  if (!data) return null;
-  if (data.email === null || data.fullName === null)
-    throw new Error('Guest data is incomplete');
-  return data as Guest;
-}
+    if (error) {
+      console.error(error);
+      throw new Error('Guest could not be loaded');
+    }
+
+    if (!data) return null;
+
+    if (data.email === null || data.fullName === null) {
+      throw new Error('Guest data is incomplete');
+    }
+
+    return data as Guest;
+  },
+);
 
 export async function getBooking(
   id: number | string,
@@ -250,3 +269,23 @@ export async function deleteBooking(id: number) {
   }
   return data;
 }
+
+export const getWishlistItems = cache(
+  async (
+    guestId: number,
+  ): Promise<Pick<WishlistRow, 'cabinId'>[]> => {
+    const { data, error } = await supabase
+      .from('wishlist_items')
+      .select('cabinId')
+      .eq('guestId', guestId);
+
+    if (error) {
+      console.error(error);
+      throw new Error(
+        'Something went wrong while fetching wishlist items for guest',
+      );
+    }
+
+    return data;
+  },
+);

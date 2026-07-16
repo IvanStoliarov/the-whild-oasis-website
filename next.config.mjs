@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  cacheComponents: true,
   images: {
+    qualities: [75, 100, 80],
     remotePatterns: [
       {
         protocol: 'https',
@@ -15,6 +17,12 @@ const nextConfig = {
         pathname: '*/**',
       },
     ],
+  },
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
+    browserToTerminal: true,
   },
   // output: 'export'
 };

@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState, useActionState } from 'react';
 import { submitRating } from '../_lib/actions';
 import RatingStars from './RatingStars';
-import { useFormState, useFormStatus } from 'react-dom';
 
 interface StarRatingProps {
   bookingId: number;
@@ -14,22 +13,12 @@ const initialState = {
   message: '',
 };
 
-function SubmitButton({ disabled }: { disabled: boolean }) {
-  const { pending } = useFormStatus();
-
-  return (
-    <button
-      className='bg-yellow-800 text-yellow-200 disabled:bg-gray-200 disabled:text-gray-800 h-7 px-3 uppercase text-xs font-bold flex items-center rounded-sm mt-4'
-      disabled={disabled || pending}
-    >
-      {pending ? 'Submitting...' : 'Submit'}
-    </button>
-  );
-}
-
 export default function StarRating({ bookingId }: StarRatingProps) {
   const [rating, setRating] = useState(0);
-  const [result, formAction] = useFormState(submitRating, initialState);
+  const [result, formAction, isPending] = useActionState(
+    submitRating,
+    initialState,
+  );
   const maxRating = 5;
   return (
     <form action={formAction}>
@@ -40,7 +29,12 @@ export default function StarRating({ bookingId }: StarRatingProps) {
         maxRating={maxRating}
         setRating={setRating}
       />
-      <SubmitButton disabled={!rating} />
+      <button
+        className='bg-yellow-800 text-yellow-200 disabled:bg-gray-200 disabled:text-gray-800 h-7 px-3 uppercase text-xs font-bold flex items-center rounded-sm mt-4'
+        disabled={isPending || !rating}
+      >
+        {isPending ? 'Submitting...' : 'Submit'}
+      </button>
       {result.message && <p>{result.message}</p>}
     </form>
   );

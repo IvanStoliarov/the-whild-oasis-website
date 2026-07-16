@@ -1,29 +1,21 @@
-import React, { Suspense } from 'react';
+import { Suspense } from 'react';
 import CabinList from '@/app/_components/CabinList';
 import Spinner from '@/app/_components/Spinner';
 import FIlter from '@/app/_components/FIlter';
 import ReservationReminder from '../_components/ReservationReminder';
-import type { CapacityFilter } from '../_lib/types';
 
 export const metadata = {
   title: 'Cabins',
 };
 
 // export const revalidate = 15;
-export const revalidate = 3600;
+// export const revalidate = 3600;
 
-const filters: CapacityFilter[] = ['all', 'small', 'medium', 'large'];
-
-export default function Page({
+export default async function Page({
   searchParams,
 }: {
-  searchParams?: { capacity?: string | string[] };
+  searchParams?: Promise<{ capacity?: string | string[] }>;
 }) {
-  const capacity =
-    typeof searchParams?.capacity === 'string' ? searchParams.capacity : 'all';
-  const filter: CapacityFilter = filters.includes(capacity as CapacityFilter)
-    ? (capacity as CapacityFilter)
-    : 'all';
   return (
     <div>
       <h1 className='text-4xl mb-5 text-accent-400 font-medium'>
@@ -40,10 +32,10 @@ export default function Page({
       <div className='flex justify-end mb-8'>
         <FIlter />
       </div>
-      <Suspense fallback={<Spinner />} key={filter}>
-        <CabinList filter={filter} />
-        <ReservationReminder />
+      <Suspense fallback={<Spinner />}>
+        <CabinList searchParamsPromise={searchParams} />
       </Suspense>
+      <ReservationReminder />
     </div>
   );
 }

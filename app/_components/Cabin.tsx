@@ -2,16 +2,25 @@ import Image from 'next/image';
 import TextExpander from './TextExpander';
 import { EyeSlashIcon, MapPinIcon, UsersIcon } from '@heroicons/react/24/solid';
 import type { Cabin as CabinType } from '../_lib/types';
+import { auth } from '../_lib/auth';
+import { getWishlistItems } from '../_lib/data-service';
+import AddToWishlistButton from './AddToWishlistButton';
 
-export default function Cabin({ cabin }: { cabin: CabinType }) {
+export default async function Cabin({ cabin }: { cabin: CabinType }) {
   const { id, name, maxCapacity, regularPrice, discount, image, description } =
     cabin;
+  const session = await auth();
+  const userWishlist = session
+    ? await getWishlistItems(session.user.guestId)
+    : [];
+  const isInWishlist = userWishlist.map(el => el.cabinId).includes(id);
   return (
-    <div className='grid md:grid-cols-[3fr_4fr] gap-20 border border-primary-800 py-3 px-5 md:px-10 mb-24'>
+    <div className='grid md:grid-cols-[3fr_4fr] gap-20 border border-primary-800 py-3 px-5 md:px-10 mb-24 relative'>
       <div className='aspect-square md:aspect-auto relative md:scale-[1.15] md:-translate-x-3'>
         <Image
           fill
           src={image}
+          sizes='(width >= 768px) 35vw, 100vw'
           className='object-cover'
           alt={`Cabin ${name}`}
         />
@@ -48,6 +57,11 @@ export default function Cabin({ cabin }: { cabin: CabinType }) {
           </li>
         </ul>
       </div>
+      {session && (
+        <div className='absolute top-0 right-0'>
+          <AddToWishlistButton cabinId={id} isInWishlist={isInWishlist} />
+        </div>
+      )}
     </div>
   );
 }

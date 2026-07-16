@@ -3,8 +3,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { CabinSummary } from '../_lib/types';
 import RatingStars from './RatingStars';
+import AddToWishlistButton from './AddToWishlistButton';
+import { auth } from '../_lib/auth';
+import { getWishlistItems } from '../_lib/data-service';
 
-function CabinCard({ cabin }: { cabin: CabinSummary }) {
+async function CabinCard({ cabin }: { cabin: CabinSummary }) {
   const {
     id,
     name,
@@ -16,21 +19,32 @@ function CabinCard({ cabin }: { cabin: CabinSummary }) {
     reviewCount,
   } = cabin;
 
+  const session = await auth();
+  const isLoggedIn = session?.user.guestId;
+  const userWishlist = session
+    ? await getWishlistItems(session.user.guestId)
+    : [];
+
+  const cabinsInWishlist = new Set(userWishlist.map(el => el.cabinId));
+
   const showRating = !!reviewCount && reviewCount > 0 && !!rating && rating > 0;
+
+  const isInWishlist = cabinsInWishlist.has(id);
 
   return (
     <div className='lg:flex border-primary-800 border'>
       <div className='flex-1 relative aspect-square'>
         <Image
           src={image}
+          sizes='(width >= 1024px) 25vw, (width >= 768px) 50vw, 100vw'
           fill
           alt={`Cabin ${name}`}
           className='object-cover border-r border-primary-800'
         />
       </div>
 
-      <div className='flex-grow'>
-        <div className='pt-5 pb-4 px-7 bg-primary-950'>
+      <div className='grow'>
+        <div className='pt-5 pb-4 px-7 bg-primary-950 relative'>
           <h3 className='text-accent-500 font-semibold text-2xl mb-3'>
             Cabin {name}
           </h3>
@@ -59,6 +73,14 @@ function CabinCard({ cabin }: { cabin: CabinSummary }) {
           </p>
           {showRating && (
             <RatingStars rating={rating} reviewCount={reviewCount} />
+          )}
+          {isLoggedIn && (
+            <div className='absolute top-0 right-0'>
+              <AddToWishlistButton
+                isInWishlist={isInWishlist}
+                cabinId={cabin.id}
+              />
+            </div>
           )}
         </div>
 
